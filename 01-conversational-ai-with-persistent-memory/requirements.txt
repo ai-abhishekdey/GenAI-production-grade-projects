@@ -1,0 +1,18 @@
+# LLM
+langchain
+langchain-openai
+langchain-anthropic
+
+# MongoDB
+langchain-mongodb
+pymongo
+
+# Callbacks & Observability
+langchain-community
+langsmith
+
+# Environment
+python-dotenv
+
+# UI
+streamlit
