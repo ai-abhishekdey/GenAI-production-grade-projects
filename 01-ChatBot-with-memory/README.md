@@ -187,12 +187,57 @@ python chatbot.py
 <img src="images/16.png" width="1080" height="480">
 </p>
 
-### 6. Run Terminal Version
+### 6. Run Streamlit version
 ```
 streamlit run app.py
 ```
+<p align="left">
+<img src="images/17.png" width="1080" height="480">
+</p>
 
-**Docker**
+### Outputs
+
+* **Login Screen**
+
+<p align="left">
+<img src="images/18.png" width="1080" height="480">
+</p>
+
+* **Intial Chat** 
+
+<p align="left">
+<img src="images/19.png" width="1080" height="480">
+</p>
+
+* **Second Chat : Demonstrating memory from previous chat**
+
+<p align="left">
+<img src="images/20.png" width="1080" height="480">
+</p>
+
+### LangSmith Observability:
+
+<p align="left">
+<img src="images/21.png" width="1080" height="480">
+</p>
+
+### MongoDB:
+
+* **Chat_histories**
+
+<p align="left">
+<img src="images/22.png" width="1080" height="480">
+</p>
+
+* **token_usage**
+
+<p align="left">
+<img src="images/23.png" width="1080" height="480">
+</p>
+
+
+## 7. Dockerization
+
 ```
 docker build -t conversational-ai .
 docker run -p 8501:8501 --env-file .env conversational-ai
