@@ -21,30 +21,10 @@ Most chatbots forget everything when you close the window. This one doesn't.
 
 ## Live Demo
 
-👉 [Hugging Face Space](https://huggingface.co/spaces/abhishek/conversational-ai-persistent-memory)
+👉 [Hugging Face Space](https://huggingface.co/spaces/abhishekdey/chatbot-with-memory)
 
 ---
-
-## Architecture
-
-```
-User Input
-    │
-    ▼
-LangChain Chain (src/chain.py)
-    │
-    ├── Loads chat history from MongoDB     (src/database.py)
-    ├── Builds prompt with history          (src/chain.py)
-    ├── Calls LLM                           (src/llm.py)
-    ├── Saves response to MongoDB           (src/database.py)
-    └── Saves token usage to MongoDB        (src/database.py)
-         │
-         ▼
-    LangSmith (traces every call)
-```
-
----
-
+=
 ## Tech Stack
 
 | Component       | Tool                        |
@@ -63,17 +43,17 @@ LangChain Chain (src/chain.py)
 
 ```
 01-conversational-ai-with-persistent-memory/
-├── chatbot.py            ← run in terminal
-├── app.py                ← run in browser (Streamlit)
-├── requirements.txt
-├── .env.example          ← copy this to .env and fill in keys
-├── Dockerfile
+├── chatbot.py                -> run in terminal
+├── app.py                       -> run in browser (Streamlit)
+├── requirements.txt   -> dependency requierements
+├── example.env           -> copy this to .env and fill in keys
+├── Dockerfile      
 ├── README.md
 └── src/
     ├── __init__.py
-    ├── llm.py            ← LLM setup (swap models here)
-    ├── database.py       ← MongoDB connection + operations
-    └── chain.py          ← LangChain chain + history logic
+    ├── llm.py                 -> LLM setup (swap models here)
+    ├── database.py     -> MongoDB connection + operations
+    └── chain.py            -> LangChain chain + history logic
 ```
 
 ---
@@ -82,8 +62,8 @@ LangChain Chain (src/chain.py)
 
 ```
 chatbot_db
-├── chat_histories     ← full conversation per user
-└── token_usage        ← token count + cost per message
+├── chat_histories     -> saves full conversation per user
+└── token_usage        -> tracks token count + cost per message
 ```
 
 ---
@@ -123,7 +103,7 @@ cp .env.example .env
 
 ```
 # LLM
-OPENAI_API_KEY="sk-********************"
+OPENAI_API_KEY=sk-********************
 
 # MongoDB
 MONGODB_URI=mongodb+srv://<username>:<password>@chatbot.nle32ij.mongodb.net/
@@ -133,7 +113,7 @@ MONGO_TOKEN_COLLECTION=token_usage
 
 # LangSmith
 LANGCHAIN_TRACING_V2=true
-LANGCHAIN_API_KEY="lsv2_******************************"
+LANGCHAIN_API_KEY=lsv2_******************************
 LANGCHAIN_PROJECT=conversational-ai-with-persistent-memory
 LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
 ```
@@ -264,37 +244,7 @@ docker tag conversational-ai abhishekdey001/conversational-ai:latest
 docker push abhishekdey001/conversational-ai:latest
 ```
 
+## 8. Deployment
 
-
-
-
----
-
-## Key Concepts Demonstrated
-
-- `RunnableWithMessageHistory` — automatic history management
-- `MongoDBChatMessageHistory` — persistent storage per user
-- Modular architecture — swap LLM, DB, or UI independently
-- Token cost tracking — per message and per user lifetime
-- LangSmith tracing — full observability on every LLM call
-
----
-
-## Switching Models
-
-Open `src/llm.py` and swap the model — nothing else changes:
-
-```python
-# GPT-4o (default)
-return ChatOpenAI(model="gpt-4o")
-
-# Claude
-return ChatAnthropic(model="claude-sonnet-4-20250514")
-
-# Local (free)
-return Ollama(model="llama3.2")
-```
-
----
-
+* The app is deployed in Hugging Face.  Follow the steps mentioned in [HUGGING_FACE.md](HUGGING_FACE.md)
 
