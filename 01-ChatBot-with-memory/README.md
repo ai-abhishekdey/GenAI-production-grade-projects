@@ -24,7 +24,6 @@ Most chatbots forget everything when you close the window. This one doesn't.
 👉 [Hugging Face Space](https://huggingface.co/spaces/abhishekdey/chatbot-with-memory)
 
 ---
-=
 ## Tech Stack
 
 | Component       | Tool                        |
