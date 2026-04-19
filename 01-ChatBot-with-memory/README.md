@@ -105,7 +105,7 @@ cd 01-ChatBot-with-memory
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-# Create venv with Python 3.12 and install dependencies
+* Create venv with Python 3.12 and install dependencies
 
 ```
 uv venv --python 3.12
