@@ -238,10 +238,35 @@ streamlit run app.py
 
 ## 7. Dockerization
 
+* Build Docker image
 ```
 docker build -t conversational-ai .
+```
+
+* Run Docker image locally
+
+```
 docker run -p 8501:8501 --env-file .env conversational-ai
 ```
+* Login to Docker Hub
+
+```
+docker login
+```
+* Tag the Image
+
+```
+docker tag conversational-ai abhishekdey001/conversational-ai:latest
+```
+
+* Push the image to docker hub
+```
+docker push abhishekdey001/conversational-ai:latest
+```
+
+
+
+
 
 ---
 
