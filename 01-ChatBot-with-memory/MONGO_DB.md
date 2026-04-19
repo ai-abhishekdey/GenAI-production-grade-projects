@@ -71,3 +71,7 @@
 </p>
 
 * Select **Drivers** and add the connection string to .env file 
+
+<p align="left">
+<img src="images/10.png" width="1080" height="480">
+</p>
