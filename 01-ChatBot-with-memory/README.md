@@ -95,7 +95,7 @@ uv pip install -r requirements.txt
 ### 3. Set up environment variables
 
 ```
-cp .env.example .env
+cp example .env .env
 ```
 
 * Fill in your `.env`:
