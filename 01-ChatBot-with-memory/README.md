@@ -1,4 +1,8 @@
-# 01 — Conversational AI with Persistent Memory
+# Title: ChatBot with memory
+
+**Author: Abhishek Dey**
+
+## About:
 
 A production-grade chatbot that remembers conversations across sessions using MongoDB. Built with LangChain, OpenAI GPT-4o, and tracked with LangSmith.
 
