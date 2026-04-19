@@ -161,7 +161,7 @@ python chatbot.py
 <img src="images/12.png" width="1080" height="480">
 </p>
 
-### Langs-Smith Observality:
+### LangSmith Observability:
 
 <p align="left">
 <img src="images/13.png" width="1080" height="480">
