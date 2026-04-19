@@ -19,6 +19,12 @@ Most chatbots forget everything when you close the window. This one doesn't.
 
 ---
 
+## Live Demo
+
+👉 [Hugging Face Space](https://huggingface.co/spaces/abhishek/conversational-ai-persistent-memory)
+
+---
+
 ## Architecture
 
 ```
@@ -88,7 +94,8 @@ chatbot_db
 
 ```
 git clone https://github.com/ai-abhishekdey/genai-production-grade-projects.git
-cd 01-conversational-ai-with-persistent-memory
+
+cd 01-ChatBot-with-memory
 ```
 
 ### 2. Create Virtual Environment Install dependencies
@@ -107,7 +114,7 @@ source .venv/bin/activate
 ```
 * Install Dependencies from requirements.txt
 ```
-Install Dependencies from requirements.txt
+uv pip install -r requirements.txt
 ```
 
 ### 3. Set up environment variables
@@ -120,30 +127,71 @@ cp .env.example .env
 
 ```
 # LLM
-OPENAI_API_KEY=sk-...
-LLM_MODEL=gpt-4o
+OPENAI_API_KEY="sk-********************"
 
 # MongoDB
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+MONGODB_URI=mongodb+srv://<username>:<password>@chatbot.nle32ij.mongodb.net/
 MONGO_DB=chatbot_db
 MONGO_CHAT_COLLECTION=chat_histories
 MONGO_TOKEN_COLLECTION=token_usage
 
 # LangSmith
 LANGCHAIN_TRACING_V2=true
-LANGCHAIN_API_KEY=ls__...
+LANGCHAIN_API_KEY="lsv2_******************************"
 LANGCHAIN_PROJECT=conversational-ai-with-persistent-memory
 LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
 ```
+### 4. Setup MongoDB Database
 
-### 4. Run
+* Follow the steps mentioned in [MONGO_DB.md](MONGO_DB.md)
 
-**Terminal version**
+### 5. Run Terminal Version
+
 ```
 python chatbot.py
 ```
 
-**Streamlit version**
+### Outputs:
+
+* First Chat
+
+<p align="left">
+<img src="images/11.png" width="1080" height="480">
+</p>
+
+* Second Chat : Demonstrating memory from previous chat
+
+<p align="left">
+<img src="images/12.png" width="1080" height="480">
+</p>
+
+### Langs-Smith Observality:
+
+<p align="left">
+<img src="images/13.png" width="1080" height="480">
+</p>
+
+### MongoDB:
+
+* **Database and collections**
+
+<p align="left">
+<img src="images/14.png" width="1080" height="480">
+</p>
+
+* **Chat_histories**
+
+<p align="left">
+<img src="images/15.png" width="1080" height="480">
+</p>
+
+* **token_usage**
+
+<p align="left">
+<img src="images/16.png" width="1080" height="480">
+</p>
+
+### 6. Run Terminal Version
 ```
 streamlit run app.py
 ```
@@ -152,34 +200,6 @@ streamlit run app.py
 ```bash
 docker build -t conversational-ai .
 docker run -p 8501:8501 --env-file .env conversational-ai
-```
-
----
-
-## Sample Conversation
-
-```
-Enter your username: abhishek
-
-Hello abhishek! Type 'exit' to quit.
-
-You: I am a Senior AI Researcher working in healthcare AI
-AI: That's a fascinating field! What kind of problems are you working on?
-
-You: exit
-
-  Messages : 1
-  Tokens   : 186
-  Cost     : $0.000744
-
-Goodbye! Your chat is saved.
-
---- next session ---
-
-Enter your username: abhishek
-
-You: What do you know about me?
-AI: You mentioned you are a Senior AI Researcher working in healthcare AI.
 ```
 
 ---
@@ -211,12 +231,4 @@ return Ollama(model="llama3.2")
 
 ---
 
-## Live Demo
 
-👉 [Hugging Face Space](https://huggingface.co/spaces/abhishek/conversational-ai-persistent-memory)
-
----
-
-## Part of
-
-[genai-production-grade-projects](https://github.com/abhishek/genai-production-grade-projects) — a growing collection of production-ready GenAI systems.
