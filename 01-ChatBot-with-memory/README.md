@@ -98,22 +98,18 @@ git clone https://github.com/ai-abhishekdey/genai-production-grade-projects.git
 cd 01-ChatBot-with-memory
 ```
 
-### 2. Create Virtual Environment Install dependencies
+### 2. Virtual environment
 
 * Install uv (if not installed)
 ```
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
-* Create venv with Python 3.12
+
+# Create venv with Python 3.12 and install dependencies
+
 ```
 uv venv --python 3.12
-```
-* Activate it
-```
 source .venv/bin/activate   
-```
-* Install Dependencies from requirements.txt
-```
 uv pip install -r requirements.txt
 ```
 
@@ -153,13 +149,13 @@ python chatbot.py
 
 ### Outputs:
 
-* First Chat
+* **Initial Chat**
 
 <p align="left">
 <img src="images/11.png" width="1080" height="480">
 </p>
 
-* Second Chat : Demonstrating memory from previous chat
+* **Second Chat : Demonstrating memory from previous chat**
 
 <p align="left">
 <img src="images/12.png" width="1080" height="480">
@@ -197,7 +193,7 @@ streamlit run app.py
 ```
 
 **Docker**
-```bash
+```
 docker build -t conversational-ai .
 docker run -p 8501:8501 --env-file .env conversational-ai
 ```
