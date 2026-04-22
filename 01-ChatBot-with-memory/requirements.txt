@@ -16,3 +16,7 @@ python-dotenv
 
 # UI
 streamlit
+
+# Encryption
+
+cryptography

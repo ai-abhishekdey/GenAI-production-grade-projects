@@ -4,19 +4,17 @@
 
 ## About:
 
-A production-grade chatbot that remembers conversations across sessions using MongoDB. Built with LangChain, OpenAI GPT-4o, and tracked with LangSmith.
+- A production-grade conversational AI chatbot built using **LangChain**, powered by **OpenAI’s GPT-4.1-nano** model
 
----
+- Maintains conversation context across sessions so users can resume chats seamlessly
 
-## What This Does
+- Stores chat history in **MongoDB** for persistence and retrieval
 
-Most chatbots forget everything when you close the window. This one doesn't.
+- **Encrypts** messages before storage and **decrypts** them only when needed, ensuring data is not saved in plain text
 
-- Each user has their own persistent conversation history stored in MongoDB
-- When a user returns, the LLM picks up exactly where it left off
-- Every message tracks token usage and cost
-- All LLM calls are traced end-to-end via LangSmith
+- Tracks **token usage** and associated cost for every interaction
 
+- Provides end-to-end tracing of LLM calls using **LangSmith**
 ---
 
 ## Live Demo
@@ -26,15 +24,17 @@ Most chatbots forget everything when you close the window. This one doesn't.
 ---
 ## Tech Stack
 
-| Component       | Tool                        |
-|-----------------|-----------------------------|
-| LLM             | OpenAI GPT-4o               |
-| Framework       | LangChain + LCEL            |
-| Memory Store    | MongoDB Atlas               |
-| Observability   | LangSmith                   |
-| Terminal UI     | Python CLI                  |
-| Web UI          | Streamlit                   |
-| Containerisation| Docker                      |
+| Component                     | Tool                                     |
+| -------------------------------- | --------------------------------- |
+| LLM                                   | OpenAI GPT-4.1-nano     |
+| Framework                      | LangChain (LCEL)              |
+| Memory Store                | MongoDB Atlas                 |
+| Encryption                      | cryptography (Fernet - AES-based) |
+| Observability                 | LangSmith                           |
+| Backend Interface       | Python (CLI)                         |
+| Web Interface              | Streamlit                                |
+| Containerization         | Docker                                    |
+
 
 ---
 
@@ -42,17 +42,18 @@ Most chatbots forget everything when you close the window. This one doesn't.
 
 ```
 01-conversational-ai-with-persistent-memory/
-├── chatbot.py                -> run in terminal
-├── app.py                       -> run in browser (Streamlit)
-├── requirements.txt   -> dependency requierements
-├── example.env           -> copy this to .env and fill in keys
-├── Dockerfile      
+├── chatbot.py                     -> Entry point for terminal-based chatbot
+├── app.py                            -> Streamlit web application
+├── requirements.txt         -> Python dependencies
+├── example.env                 -> Environment variables template (copy to .env)
+├── Dockerfile                      -> Containerization setup
 ├── README.md
 └── src/
     ├── __init__.py
-    ├── llm.py                 -> LLM setup (swap models here)
-    ├── database.py     -> MongoDB connection + operations
-    └── chain.py            -> LangChain chain + history logic
+    ├── llm.py                          -> LLM configuration and initialization
+    ├── database.py              -> MongoDB connection, encrypted storage, and retrieval
+    ├── encryption.py           -> Fernet-based encryption and decryption utilities
+    └── chain.py                     -> LangChain pipeline and chat logic
 ```
 
 ---
@@ -98,6 +99,11 @@ uv pip install -r requirements.txt
 cp example .env .env
 ```
 
+* Generate encryption key  and add in .env 
+```
+python generate_encryption_key.py
+
+```
 * Fill in your `.env`:
 
 ```
@@ -115,6 +121,11 @@ LANGCHAIN_TRACING_V2=true
 LANGCHAIN_API_KEY=lsv2_******************************
 LANGCHAIN_PROJECT=conversational-ai-with-persistent-memory
 LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+
+# Encryption Key
+
+ENCRYPTION_KEY=your-generated-fernet-key-here
+
 ```
 ### 4. Setup MongoDB Database
 
@@ -194,28 +205,8 @@ streamlit run app.py
 <img src="images/20.png" width="1080" height="480">
 </p>
 
-### LangSmith Observability:
 
-<p align="left">
-<img src="images/21.png" width="1080" height="480">
-</p>
-
-### MongoDB:
-
-* **Chat_histories**
-
-<p align="left">
-<img src="images/22.png" width="1080" height="480">
-</p>
-
-* **token_usage**
-
-<p align="left">
-<img src="images/23.png" width="1080" height="480">
-</p>
-
-
-## 7. Dockerization
+## 7. Containerization
 
 * Build Docker image
 ```
