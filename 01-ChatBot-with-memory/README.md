@@ -72,7 +72,7 @@ chatbot_db
 ## Architecture
 
 <p align="left">
-<img src="images/architecture.png" width="700" height="800">
+<img src="images/architecture.png" width="400" height="500">
 </p>
 
 1. User sends input (CLI or Streamlit UI)
