@@ -29,7 +29,7 @@
 | LLM                                   | OpenAI GPT-4.1-nano     |
 | Framework                      | LangChain (LCEL)              |
 | Memory Store                | MongoDB Atlas                 |
-| Encryption                      | cryptography (Fernet - AES-based) |
+| Encryption / Decryption   | cryptography (Fernet - AES-based) |
 | Observability                 | LangSmith                           |
 | Backend Interface       | Python (CLI)                         |
 | Web Interface              | Streamlit                                |
@@ -42,18 +42,19 @@
 
 ```
 01-conversational-ai-with-persistent-memory/
-├── chatbot.py                     -> Entry point for terminal-based chatbot
-├── app.py                            -> Streamlit web application
-├── requirements.txt         -> Python dependencies
-├── example.env                 -> Environment variables template (copy to .env)
-├── Dockerfile                      -> Containerization setup
+├── chatbot.py                 -> Entry point for terminal-based chatbot
+├── app.py                     -> Streamlit web application
+├── requirements.txt           -> Python dependencies
+├── example.env                -> Environment variables template (copy to .env)
+├── generate_encryption_key.py -> Utility script to generate Fernet encryption key
+├── Dockerfile                 -> Containerization setup
 ├── README.md
 └── src/
     ├── __init__.py
-    ├── llm.py                          -> LLM configuration and initialization
-    ├── database.py              -> MongoDB connection, encrypted storage, and retrieval
-    ├── encryption.py           -> Fernet-based encryption and decryption utilities
-    └── chain.py                     -> LangChain pipeline and chat logic
+    ├── llm.py                 -> LLM configuration and initialization
+    ├── database.py            -> MongoDB connection, encrypted storage, and retrieval
+    ├── encryption.py          -> Fernet-based encryption and decryption utilities
+    └── chain.py               -> LangChain pipeline and chat logic
 ```
 
 ---
@@ -67,6 +68,21 @@ chatbot_db
 ```
 
 ---
+
+## Architecture
+
+<p align="left">
+<img src="images/architecture.png" width="700" height="800">
+</p>
+
+1. User sends input (CLI or Streamlit UI)
+2. chain.py fetches past history from database.py
+3. database.py decrypts messages using encryption.py
+4. Decrypted history + user input -> LLM (via llm.py)
+5. LangSmith traces the LLM call
+6. Response is returned
+7. Messages are encrypted again
+8. Encrypted data is stored in MongoDB Atlas
 
 ## Quickstart
 
