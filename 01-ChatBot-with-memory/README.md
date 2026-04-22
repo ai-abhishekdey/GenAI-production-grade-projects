@@ -22,6 +22,23 @@
 👉 [Hugging Face Space](https://huggingface.co/spaces/abhishekdey/chatbot-with-memory)
 
 ---
+
+## Architecture
+
+<p align="left">
+<img src="images/architecture.png" width="500" height="600">
+</p>
+
+1. User sends input (CLI or Streamlit UI)
+2. chain.py fetches past history from database.py
+3. database.py decrypts messages using encryption.py
+4. Decrypted history + user input is fed to LLM (via llm.py)
+5. LangSmith traces the LLM call
+6. Response is returned
+7. Messages are encrypted again
+8. Encrypted data is stored in MongoDB Atlas
+---
+
 ## Tech Stack
 
 | Component                     | Tool                                     |
@@ -34,8 +51,6 @@
 | Backend Interface       | Python (CLI)                         |
 | Web Interface              | Streamlit                                |
 | Containerization         | Docker                                    |
-
-
 ---
 
 ## Project Structure
@@ -68,21 +83,6 @@ chatbot_db
 ```
 
 ---
-
-## Architecture
-
-<p align="left">
-<img src="images/architecture.png" width="400" height="500">
-</p>
-
-1. User sends input (CLI or Streamlit UI)
-2. chain.py fetches past history from database.py
-3. database.py decrypts messages using encryption.py
-4. Decrypted history + user input -> LLM (via llm.py)
-5. LangSmith traces the LLM call
-6. Response is returned
-7. Messages are encrypted again
-8. Encrypted data is stored in MongoDB Atlas
 
 ## Quickstart
 
