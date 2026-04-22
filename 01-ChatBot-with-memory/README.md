@@ -1,4 +1,4 @@
-# Title: ChatBot with memory
+# Title: Conversational AI ChatBot with persistant memory
 
 **Author: Abhishek Dey**
 
@@ -17,13 +17,13 @@
 - Provides end-to-end tracing of LLM calls using **LangSmith**
 ---
 
-## Live Demo
+## Live Demo:
 
 👉 [Hugging Face Space](https://huggingface.co/spaces/abhishekdey/chatbot-with-memory)
 
 ---
 
-## Architecture
+## Architecture:
 
 <p align="left">
 <img src="images/architecture.png" width="500" height="600">
@@ -39,7 +39,7 @@
 8. Encrypted data is stored in MongoDB Atlas
 ---
 
-## Tech Stack
+## Tech Stack:
 
 | Component                     | Tool                                     |
 | -------------------------------- | --------------------------------- |
@@ -53,7 +53,7 @@
 | Containerization         | Docker                                    |
 ---
 
-## Project Structure
+## Project Structure:
 
 ```
 01-conversational-ai-with-persistent-memory/
@@ -74,7 +74,7 @@
 
 ---
 
-## MongoDB Collections
+## MongoDB Collections:
 
 ```
 chatbot_db
@@ -84,7 +84,7 @@ chatbot_db
 
 ---
 
-## Quickstart
+## Quickstart:
 
 ### 1. Clone the repo
 
