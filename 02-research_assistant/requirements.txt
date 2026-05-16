@@ -1,0 +1,48 @@
+# ── LangChain ─────────────────────────────────────────────────────
+langchain
+langchain-community
+langchain-classic
+langchain-core
+langchain-openai
+langchain-text-splitters
+langchain-experimental          # SemanticChunker
+langchain-chroma
+langchain-qdrant
+
+# ── LLM Providers ─────────────────────────────────────────────────
+openai
+
+# ── Embeddings & Vector Store ──────────────────────────────────────
+sentence-transformers           # HuggingFaceCrossEncoder backend
+chromadb
+
+# ── Document Loading ───────────────────────────────────────────────
+pypdf
+requests                        # URL-based PDF download
+
+# ── LandingAI ADE ─────────────────────────────────────────────────
+landingai-ade
+
+# ── Retrieval ─────────────────────────────────────────────────────
+rank-bm25                       # BM25Retriever backend
+
+# ── Reranker ──────────────────────────────────────────────────────
+flashrank
+
+# ── Guardrails ────────────────────────────────────────────────────
+guardrails-ai>=0.5.13
+
+# ── Evaluation ────────────────────────────────────────────────────
+ragas>=0.2.0
+datasets                        # ragas internal dependency
+deepeval
+json-repair
+
+# ── Reporting ─────────────────────────────────────────────────────
+reportlab
+matplotlib
+numpy
+pandas
+
+# ── Utilities ─────────────────────────────────────────────────────
+python-dotenv
