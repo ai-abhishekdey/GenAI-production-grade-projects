@@ -1,0 +1,19 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Frontend only needs these three — no ML libraries
+RUN pip install --no-cache-dir streamlit requests python-dotenv
+
+COPY app.py .
+
+EXPOSE 8501
+
+# Overridden in docker-compose to point at the backend service
+ENV API_BASE_URL=http://localhost:8000
+
+CMD ["streamlit", "run", "app.py", \
+     "--server.port=8501", \
+     "--server.address=0.0.0.0", \
+     "--server.headless=true", \
+     "--browser.gatherUsageStats=false"]

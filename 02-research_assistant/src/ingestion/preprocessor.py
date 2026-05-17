@@ -1,13 +1,24 @@
+"""
+preprocessor.py
+---------------
+Text cleaning and filtering applied to raw documents before chunking.
+"""
+
 from langchain_core.documents import Document
 
-# Common reference section headings in research papers
+from src.observability.logger import get_logger
+
+logger = get_logger(__name__)
+
 REFERENCE_HEADINGS = ["references", "bibliography", "works cited"]
 
 
-# ── Basic Text Cleaning ─────────────────────────────────
-
-def clean_text(text: str) -> str:
-    # Fix hyphenated line breaks
+# -------------------------------------------------------------
+# clean_text: fixes hyphenated line breaks and normalises
+# whitespace in a single page of text
+# -------------------------------------------------------------
+def clean_text(text):
+    # rejoin words split across lines with a hyphen (common in PDFs)
     lines = text.split("\n")
     for i in range(len(lines) - 1):
         if lines[i].endswith("-"):
@@ -15,16 +26,15 @@ def clean_text(text: str) -> str:
             lines[i + 1] = ""
 
     text = "\n".join(lines)
-
-    # Normalize whitespace
     text = " ".join(text.split())
-
     return text.strip()
 
 
-def remove_references(documents: list) -> list:
-    # Scan each document for a reference heading
-    # Once found, trim that document and drop everything after it
+# -------------------------------------------------------------
+# remove_references: scans pages in order and drops everything
+# from the first reference heading onwards
+# -------------------------------------------------------------
+def remove_references(documents):
     filtered = []
 
     for doc in documents:
@@ -39,42 +49,33 @@ def remove_references(documents: list) -> list:
         if ref_line_index is not None:
             trimmed_content = "\n".join(lines[:ref_line_index]).strip()
             if trimmed_content:
-                filtered.append(Document(
-                    page_content=trimmed_content,
-                    metadata=doc.metadata
-                ))
-            print(
-                f"[data-preprocessing] References found in the document — stopping here")
+                filtered.append(Document(page_content=trimmed_content, metadata=doc.metadata))
+            logger.debug("reference section found — truncating")
             break
 
         filtered.append(doc)
 
-    if filtered:
-        last_doc_lines = [
-            line for line in filtered[-1].page_content.split("\n") if line.strip() != ""]
-        print(f"[data-preprocessing] Last 2 lines of filtered content:")
-        print(f"  {last_doc_lines[-2] if len(last_doc_lines) >= 2 else ''}")
-        print(f"  {last_doc_lines[-1] if len(last_doc_lines) >= 1 else ''}")
-
-    print(
-        f"[data-preprocessing] {len(filtered)} documents after reference removal")
+    logger.info("reference removal done", extra={"doc_count": len(filtered)})
     return filtered
 
 
-def preprocess_documents(documents: list) -> list:
-    print(f"[data-preprocessing] Starting with {len(documents)} documents")
+# -------------------------------------------------------------
+# preprocess_documents: runs the full cleaning pipeline —
+# reference removal first, then whitespace normalisation.
+# Order matters: clean_text collapses newlines which would
+# break the heading detection in remove_references.
+# -------------------------------------------------------------
+def preprocess_documents(documents):
+    logger.info("preprocessing started", extra={"doc_count": len(documents)})
 
-    # Remove references first — before whitespace normalization
-    # clean_text collapses newlines which breaks heading detection
+    # remove references before cleaning — clean_text collapses newlines
+    # which breaks heading detection
     documents = remove_references(documents)
 
     processed = [
-        Document(
-            page_content=clean_text(doc.page_content),
-            metadata=doc.metadata
-        )
+        Document(page_content=clean_text(doc.page_content), metadata=doc.metadata)
         for doc in documents
     ]
 
-    print(f"[data-preprocessing] Cleaned {len(processed)} documents")
+    logger.info("preprocessing complete", extra={"doc_count": len(processed)})
     return processed

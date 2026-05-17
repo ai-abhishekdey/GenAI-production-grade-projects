@@ -18,6 +18,7 @@ chromadb
 
 # ── Document Loading ───────────────────────────────────────────────
 pypdf
+pymupdf                         # PDF page rendering for evidence highlighting
 requests                        # URL-based PDF download
 
 # ── LandingAI ADE ─────────────────────────────────────────────────
@@ -30,7 +31,9 @@ rank-bm25                       # BM25Retriever backend
 flashrank
 
 # ── Guardrails ────────────────────────────────────────────────────
-guardrails-ai>=0.5.13
+# Optional — only needed when ENABLE_INPUT_GUARDRAILS or ENABLE_OUTPUT_GUARDRAILS = True
+# Requires manual setup: guardrails configure && guardrails hub install hub://...
+# guardrails-ai>=0.5.13
 
 # ── Evaluation ────────────────────────────────────────────────────
 ragas>=0.2.0
@@ -44,5 +47,16 @@ matplotlib
 numpy
 pandas
 
+# ── API ───────────────────────────────────────────────────────────
+fastapi
+uvicorn[standard]               # ASGI server with uvloop + httptools
+python-multipart                # required for UploadFile (file ingestion endpoint)
+
+# ── Frontend ──────────────────────────────────────────────────────
+streamlit
+
 # ── Utilities ─────────────────────────────────────────────────────
 python-dotenv
+langsmith                       # LangSmith tracing for LangChain pipelines
+python-json-logger             # JSON structured log formatting
+prometheus-fastapi-instrumentator  # Prometheus /metrics endpoint + HTTP auto-instrumentation

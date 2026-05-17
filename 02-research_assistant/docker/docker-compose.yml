@@ -1,0 +1,93 @@
+name: research-assistant
+
+# Full stack: backend + frontend + Prometheus + Grafana
+#
+# Run from the project root:
+#   docker compose -f docker/docker-compose.yml up -d --build
+#
+# Stop:
+#   docker compose -f docker/docker-compose.yml down
+#
+# Rebuild a single service after code changes:
+#   docker compose -f docker/docker-compose.yml up -d --build backend
+
+services:
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: ra-backend
+    env_file: ../.env
+    environment:
+      - LOG_TO_FILE=false
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads:/app/data/uploads
+      - vector_db:/app/vector_db
+      - logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: ra-frontend
+    env_file: ../.env
+    environment:
+      - API_BASE_URL=http://backend:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: ra-prometheus
+    volumes:
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: ra-grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  uploads:
+  vector_db:
+  logs:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    name: ra-network

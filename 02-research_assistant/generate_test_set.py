@@ -1,12 +1,13 @@
 """
 generate_test_set.py
 --------------------
-Topic-controlled Q&A benchmark generation.
+Topic-controlled Q&A benchmark generation from a research paper PDF.
 
-python generate_test_set.py \
-        --source data/papers/MizoPRS.pdf  \
+Usage:
+    python generate_test_set.py \
+        --source data/papers/MizoPRS.pdf \
         --dest data/eval/qna_dataset.json \
-        --qna_topic "dataset"  \
+        --qna_topic "dataset" \
         --size 10
 """
 
@@ -19,18 +20,20 @@ from src.ingestion.preprocessor import preprocess_documents
 from src.generation.llm import get_openai_llm
 
 
-# ── Helpers ────────────────────────────────────────────
-
+# -------------------------------------------------------------
+# build_full_text: joins all page content and caps at 15k chars
+# to stay within LLM context limits
+# -------------------------------------------------------------
 def build_full_text(documents):
-    text = "\n\n".join([doc.page_content for doc in documents])
-    return text[:15000]
+    return "\n\n".join(doc.page_content for doc in documents)[:15000]
 
 
+# -------------------------------------------------------------
+# generate_qna: prompts the LLM to generate Q&A pairs for a
+# topic, passing already-seen questions to avoid repetition
+# -------------------------------------------------------------
 def generate_qna(llm, text, topic, num_questions, existing_questions=None):
-
-    existing_text = ""
-    if existing_questions:
-        existing_text = "\n".join(existing_questions[:20])
+    existing_text = "\n".join((existing_questions or [])[:20])
 
     prompt = f"""
 You are creating a high-quality Q&A benchmark dataset.
@@ -69,61 +72,53 @@ TEXT:
     return response.content if hasattr(response, "content") else response
 
 
+# -------------------------------------------------------------
+# parse_and_clean: parses the LLM JSON response, attempts repair
+# if malformed, and filters out incomplete or too-short entries
+# -------------------------------------------------------------
 def parse_and_clean(qna_str):
     try:
         data = json.loads(qna_str)
     except Exception:
-        print("[testset] JSON invalid → attempting repair...")
+        print("[testset] JSON invalid — attempting repair...")
         try:
-            repaired = repair_json(qna_str)
-            data = json.loads(repaired)
-            print("[testset] ✅ JSON repaired")
+            data = json.loads(repair_json(qna_str))
+            print("[testset] JSON repaired successfully")
         except Exception:
-            print("[testset] ❌ Failed → skipping batch")
+            print("[testset] Repair failed — skipping batch")
             return []
 
-    cleaned = []
-    for d in data:
-        if not isinstance(d, dict):
-            continue
-        if not d.get("question") or not d.get("answer"):
-            continue
-        if len(d["question"].strip()) < 5:
-            continue
-        cleaned.append(d)
-
-    return cleaned
+    return [
+        d for d in data
+        if isinstance(d, dict)
+        and d.get("question")
+        and d.get("answer")
+        and len(d["question"].strip()) >= 5
+    ]
 
 
+# -------------------------------------------------------------
+# generate_qna_batched: generates Q&A in small batches and
+# deduplicates across batches until the target size is reached
+# -------------------------------------------------------------
 def generate_qna_batched(llm, text, topic, total_size, batch_size=5):
-
     all_data = []
     seen_questions = set()
-
     num_batches = (total_size + batch_size - 1) // batch_size
 
     for i in range(num_batches):
         print(f"[testset] Batch {i+1}/{num_batches}")
 
-        qna_str = generate_qna(
-            llm,
-            text,
-            topic,
-            batch_size,
-            existing_questions=list(seen_questions)
+        batch_data = parse_and_clean(
+            generate_qna(llm, text, topic, batch_size, existing_questions=list(seen_questions))
         )
-
-        batch_data = parse_and_clean(qna_str)
 
         for item in batch_data:
             q = item["question"].strip().lower()
-
             if q in seen_questions:
                 continue
-
             seen_questions.add(q)
             all_data.append(item)
-
             if len(all_data) >= total_size:
                 break
 
@@ -133,55 +128,50 @@ def generate_qna_batched(llm, text, topic, total_size, batch_size=5):
     return all_data[:total_size]
 
 
+# -------------------------------------------------------------
+# add_serial_numbers: adds a 1-based id field to each Q&A entry
+# -------------------------------------------------------------
 def add_serial_numbers(data):
     for i, d in enumerate(data):
         d["id"] = i + 1
     return data
 
 
+# -------------------------------------------------------------
+# save_output: writes the Q&A dataset to a JSON file
+# -------------------------------------------------------------
 def save_output(data, path):
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
-
     print(f"[testset] Saved {len(data)} Q&A pairs → {path}")
 
-
-# ── Main ───────────────────────────────────────────────
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-
-    parser.add_argument("--source", required=True)
-    parser.add_argument("--dest", required=True)
+    parser.add_argument("--source",    required=True)
+    parser.add_argument("--dest",      required=True)
     parser.add_argument("--qna_topic", required=True)
-    parser.add_argument("--size", type=int, default=10)
-
+    parser.add_argument("--size",      type=int, default=10)
     args = parser.parse_args()
 
     print("\n========================================")
     print("STEP 1 : LOAD + PREPROCESS")
     print("========================================")
 
-    documents = load_pdf(args.source)
-    documents = preprocess_documents(documents)
-
-    print(f"[testset] Documents: {len(documents)}")
+    documents = preprocess_documents(load_pdf(args.source))
+    print(f"[testset] Loaded {len(documents)} pages")
 
     print("\n========================================")
     print("STEP 2 : GENERATE QNA (TOPIC-BASED)")
     print("========================================")
 
-    full_text = build_full_text(documents)
-    llm = get_openai_llm()
-
     qna_data = generate_qna_batched(
-        llm,
-        full_text,
+        get_openai_llm(),
+        build_full_text(documents),
         args.qna_topic,
         args.size
     )
-
     qna_data = add_serial_numbers(qna_data)
 
     print("\n--- Sample ---")

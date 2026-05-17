@@ -1,0 +1,24 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# build-essential: compiles C extensions (chromadb, sentence-transformers, etc.)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Runtime directories — overridden by named volumes in docker-compose
+RUN mkdir -p data/uploads data/ade_outputs vector_db logs/app logs/experiments
+
+EXPOSE 8000
+
+# Containers log to stdout; the platform captures it
+ENV LOG_TO_FILE=false
+
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

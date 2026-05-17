@@ -5,8 +5,12 @@ load_dotenv()
 
 # ── API Keys ────────────────────────────────────────────
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-ADE_API_KEY = os.getenv("VISION_AGENT_API_KEY")
+OPENAI_API_KEY  = os.getenv("OPENAI_API_KEY")
+ADE_API_KEY     = os.getenv("VISION_AGENT_API_KEY")
+
+# LangSmith — set LANGCHAIN_TRACING_V2=true in .env to enable
+LANGSMITH_API_KEY = os.getenv("LANGCHAIN_API_KEY")
+LANGSMITH_PROJECT = os.getenv("LANGCHAIN_PROJECT", "research-assistant")
 
 # ── Models ──────────────────────────────────────────────
 
@@ -27,7 +31,7 @@ ARXIV_URL = "https://arxiv.org/pdf/2409.10545"
 
 # ── Chunking ────────────────────────────────────────────
 
-# "fixed" | "recursive" | "semantic" | "page" | "layout" | "hybrid" (semantic + layout)
+# best strategy from experiments — layout-aware chunking via LandingAI ADE
 CHUNK_STRATEGY = "layout"
 
 CHUNK_SIZE = 512
@@ -36,7 +40,7 @@ ADE_OUTPUT_DIR = "data/ade_outputs"
 
 # ── Vector Store ────────────────────────────────────────
 
-VECTOR_DB = "chroma"   # "chroma" | "qdrant"
+VECTOR_DB = "qdrant"   # "chroma" | "qdrant"
 
 # Chroma
 CHROMA_DB_DIR = "vector_db/chroma_db"

@@ -1,7 +1,7 @@
 """
 latency_tracker.py
 ------------------
-Simple utility for tracking latency of different stages.
+Tracks wall-clock time for each stage of the RAG pipeline.
 """
 
 import time
@@ -10,38 +10,34 @@ import time
 class LatencyTracker:
 
     def __init__(self):
-
-        self.start_time = {}
+        self.start_times = {}
         self.latency = {}
 
+    # -------------------------------------------------------------
+    # start: records the start time for a named stage
+    # -------------------------------------------------------------
     def start(self, stage):
+        self.start_times[stage] = time.time()
 
-        self.start_time[stage] = time.time()
-
+    # -------------------------------------------------------------
+    # stop: calculates elapsed time since start() and stores it
+    # -------------------------------------------------------------
     def stop(self, stage):
+        self.latency[stage] = round(time.time() - self.start_times[stage], 4)
 
-        elapsed = time.time() - self.start_time[stage]
-
-        self.latency[stage] = round(elapsed, 4)
-
+    # -------------------------------------------------------------
+    # get_latency: returns the latency dict for saving to results
+    # -------------------------------------------------------------
     def get_latency(self):
-
         return self.latency
 
-    def print_latency(self):
-
-        print("\n========================================")
-        print("           LATENCY REPORT               ")
-        print("========================================")
-
-        total = 0
-
-        for stage, value in self.latency.items():
-
-            print(f"{stage} : {value} sec")
-
-            total += value
-
-        print("----------------------------------------")
-        print(f"total : {round(total, 4)} sec")
-        print("========================================")
+    # -------------------------------------------------------------
+    # log_report: emits per-stage latency and total as structured
+    # log records so the breakdown lands in the experiment log file
+    # -------------------------------------------------------------
+    def log_report(self, logger):
+        total = sum(self.latency.values())
+        logger.info(
+            "latency report",
+            extra={"stages": self.latency, "total_sec": round(total, 4)},
+        )

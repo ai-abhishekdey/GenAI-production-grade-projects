@@ -1,65 +1,79 @@
-import os
-
-from langchain_core.documents import Document
+"""
+retriever.py
+------------
+Retrieval strategies for fetching relevant chunks from the vector store.
+Supports dense, MMR, sparse (BM25), and hybrid retrieval.
+All functions are async — call with await from async contexts or asyncio.run() from sync.
+"""
 
 from config import RETRIEVAL_STRATEGY, TOP_K, MMR_LAMBDA, DENSE_WEIGHT, SPARSE_WEIGHT
+from src.observability.logger import get_logger
 
-# ── Entry Point ─────────────────────────────────────────
+logger = get_logger(__name__)
 
 
-def retrieve(vector_store, documents, query: str):
+# -------------------------------------------------------------
+# retrieve: async entry point that dispatches to the correct
+# strategy based on RETRIEVAL_STRATEGY set in config.py
+# -------------------------------------------------------------
+async def retrieve(vector_store, documents, query):
     if RETRIEVAL_STRATEGY == "dense":
-        return get_dense_retrieval(vector_store, query)
-
+        return await get_dense_retrieval(vector_store, query)
     elif RETRIEVAL_STRATEGY == "mmr":
-        return get_mmr_retrieval(vector_store, query)
-
+        return await get_mmr_retrieval(vector_store, query)
     elif RETRIEVAL_STRATEGY == "sparse":
-        return get_sparse_retrieval(documents, query)
-
+        return await get_sparse_retrieval(documents, query)
     elif RETRIEVAL_STRATEGY == "hybrid":
-        return get_hybrid_retrieval(vector_store, documents, query)
-
+        return await get_hybrid_retrieval(vector_store, documents, query)
     else:
         raise ValueError(f"Invalid RETRIEVAL_STRATEGY: {RETRIEVAL_STRATEGY}")
 
 
-# ── 1. Dense ───────────────────────────────────────────
-
-def get_dense_retrieval(vector_store, query):
+# -------------------------------------------------------------
+# get_dense_retrieval: standard cosine similarity search
+# against the vector store
+# -------------------------------------------------------------
+async def get_dense_retrieval(vector_store, query):
     retriever = vector_store.as_retriever(search_kwargs={"k": TOP_K})
-    results = retriever.invoke(query)
-    print(f"[retrieval:dense] {len(results)} results")
+    results = await retriever.ainvoke(query)
+    logger.info("dense retrieval", extra={"result_count": len(results)})
     return results, retriever
 
 
-# ── 2. MMR ─────────────────────────────────────────────
-
-def get_mmr_retrieval(vector_store, query):
+# -------------------------------------------------------------
+# get_mmr_retrieval: maximal marginal relevance search —
+# balances relevance with diversity to reduce redundant chunks
+# -------------------------------------------------------------
+async def get_mmr_retrieval(vector_store, query):
     retriever = vector_store.as_retriever(
         search_type="mmr",
         search_kwargs={"k": TOP_K, "lambda_mult": MMR_LAMBDA}
     )
-    results = retriever.invoke(query)
-    print(f"[retrieval:mmr] {len(results)} results")
+    results = await retriever.ainvoke(query)
+    logger.info("mmr retrieval", extra={"result_count": len(results)})
     return results, retriever
 
 
-# ── 3. Sparse (BM25) ───────────────────────────────────
-
-def get_sparse_retrieval(documents, query):
+# -------------------------------------------------------------
+# get_sparse_retrieval: keyword-based BM25 retrieval —
+# works directly on raw document text, no embeddings needed
+# -------------------------------------------------------------
+async def get_sparse_retrieval(documents, query):
     from langchain_community.retrievers import BM25Retriever
 
     retriever = BM25Retriever.from_documents(documents)
     retriever.k = TOP_K
-    results = retriever.invoke(query)
-    print(f"[retrieval:sparse] {len(results)} results")
+    # BM25 has no native async — ainvoke() falls back to a thread executor internally
+    results = await retriever.ainvoke(query)
+    logger.info("sparse retrieval", extra={"result_count": len(results)})
     return results, retriever
 
 
-# ── 4. Hybrid (Dense + Sparse) ─────────────────────────
-
-def get_hybrid_retrieval(vector_store, documents, query):
+# -------------------------------------------------------------
+# get_hybrid_retrieval: combines BM25 and dense retrieval using
+# a weighted ensemble for better recall across query types
+# -------------------------------------------------------------
+async def get_hybrid_retrieval(vector_store, documents, query):
     from langchain_community.retrievers import BM25Retriever
     from langchain_classic.retrievers import EnsembleRetriever
 
@@ -73,7 +87,6 @@ def get_hybrid_retrieval(vector_store, documents, query):
         weights=[SPARSE_WEIGHT, DENSE_WEIGHT]
     )
 
-    results = retriever.invoke(query)
-    print(
-        f"[retrieval:hybrid] {len(results)} results (sparse={SPARSE_WEIGHT}, dense={DENSE_WEIGHT})")
+    results = await retriever.ainvoke(query)
+    logger.info("hybrid retrieval", extra={"result_count": len(results), "sparse_weight": SPARSE_WEIGHT, "dense_weight": DENSE_WEIGHT})
     return results, retriever

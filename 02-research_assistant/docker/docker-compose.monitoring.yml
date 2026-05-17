@@ -1,0 +1,51 @@
+version: "3.8"
+
+# Spin up Prometheus + Grafana alongside your already-running FastAPI server.
+#
+# Usage:
+#   docker compose -f docker-compose.monitoring.yml up -d
+#
+# Prometheus UI : http://localhost:9090
+# Grafana UI    : http://localhost:3000  (admin / admin on first login)
+#
+# Stop:
+#   docker compose -f docker-compose.monitoring.yml down
+
+services:
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: ra-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+    ports:
+      - "9090:9090"
+    # on Linux, host.docker.internal doesn't resolve by default —
+    # this extra-host maps it to the host machine's gateway IP
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: ra-grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:

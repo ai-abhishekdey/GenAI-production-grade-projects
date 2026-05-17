@@ -1,0 +1,162 @@
+{
+  "title": "Research Assistant",
+  "uid": "research-assistant",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "15s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "HTTP Request Rate (req/s)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total[1m])",
+          "legendFormat": "{{method}} {{handler}} {{status_code}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 2,
+      "title": "HTTP P95 Latency (ms)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[1m])) * 1000",
+          "legendFormat": "p95 {{handler}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 3,
+      "title": "Ingestion Runs (total)",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 8, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(ingestion_runs_total) by (status)",
+          "legendFormat": "{{status}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Ingestion Duration (p95, seconds)",
+      "type": "stat",
+      "gridPos": { "x": 6, "y": 8, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(ingestion_duration_seconds_bucket[5m]))",
+          "legendFormat": "p95"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "id": 5,
+      "title": "Chunks Indexed (p50 / p95)",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 8, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(ingestion_chunks_per_run_bucket[5m]))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(ingestion_chunks_per_run_bucket[5m]))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Docs in Memory",
+      "type": "stat",
+      "gridPos": { "x": 18, "y": 8, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "docs_in_memory",
+          "legendFormat": "chunks"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Query Rate (req/s)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(query_requests_total[1m])",
+          "legendFormat": "{{status}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 8,
+      "title": "Query Latency (ms)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(query_latency_ms_bucket[1m]))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(query_latency_ms_bucket[1m]))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(query_latency_ms_bucket[1m]))",
+          "legendFormat": "p99"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 9,
+      "title": "Evidence Renders (total)",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 20, "w": 8, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(evidence_requests_total{status=\"success\"})",
+          "legendFormat": "success"
+        }
+      ],
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "green", "mode": "fixed" } } }
+    },
+    {
+      "id": 10,
+      "title": "Evidence Errors — No Document Loaded",
+      "type": "stat",
+      "gridPos": { "x": 8, "y": 20, "w": 8, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(evidence_requests_total{status=\"not_loaded\"})",
+          "legendFormat": "not_loaded"
+        }
+      ],
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "orange", "mode": "fixed" } } }
+    },
+    {
+      "id": 11,
+      "title": "Evidence Errors — Render Failures",
+      "type": "stat",
+      "gridPos": { "x": 16, "y": 20, "w": 8, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(evidence_requests_total{status=\"render_error\"})",
+          "legendFormat": "render_error"
+        }
+      ],
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "red", "mode": "fixed" } } }
+    }
+  ]
+}

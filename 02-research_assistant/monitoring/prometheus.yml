@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s      # how often Prometheus polls each target
+  evaluation_interval: 15s  # how often alerting rules are evaluated
+
+scrape_configs:
+  - job_name: research-assistant
+    static_configs:
+      # "backend" resolves via the shared ra-network defined in docker-compose.yml
+      - targets: ["backend:8000"]
+    metrics_path: /metrics
